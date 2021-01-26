@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  db:
+    container_name: timer_data_db
+    image: postgres
+    restart: always
+    ports:
+    - 5432:5432
+    environment:
+      POSTGRES_DB: timer_data
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: "${PSQL_PWD}"
+
+
+volumes:
+  pg_data:
