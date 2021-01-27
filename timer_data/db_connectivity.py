@@ -1,5 +1,5 @@
 import os
-
+from contextlib import contextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
@@ -24,8 +24,12 @@ def connection():
     return CONNECTION
 
 
+@contextmanager
 def session() -> Session:
     global SESSION
     if SESSION is None:
         SESSION = sessionmaker(bind=engine())
-    return SESSION()
+    s = SESSION()
+    yield s
+    s.commit()
+

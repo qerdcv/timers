@@ -13,7 +13,6 @@ async def index():
 
 
 async def ping(request):
-    print(request['user'])
     return web.json_response({'message': 'pong'})
 
 
@@ -21,16 +20,16 @@ async def create_user(request):
     data = await request.json()
     user = User(**data)
     user.password = encode_user_password(user.password)
-    s = session()
-    s.add(user)
-    s.commit()
+    with session() as s:
+        s.add(user)
+        s.commit()
     return web.json_response({'id': user.id}, status=201)
 
 
 async def login(request):
     data = await request.json()
-    s = session()
-    user = s.query(User).filter_by(username=data['username']).first()
+    with session() as s:
+        user = s.query(User).filter_by(username=data['username']).first()
     if not user:
         return web.json_response(
             {'message': f'User with username {data["username"]} not found'},
@@ -57,37 +56,32 @@ async def create_timer(request):
     data = await request.json()
     data['user_id'] = request['user']['id']
     timer = Timer(**data)
-    s = session()
-    s.add(timer)
-    s.commit()
+    with session() as s:
+        s.add(timer)
     return web.json_response({'id': timer.id})
 
 
 async def get_timers(request):
-    timers = (session()
-              .query(Timer)
-              .filter(Timer.user_id == int(request.match_info['user_id']))
-              )
-    if not request['user'] or request['user']['id'] != request.match_info['user_id']:
+    with session() as s:
+        timers = s.query(Timer)
+        if not request['user'] or request['user']['id'] != int(request.match_info['user_id']):
+            return web.json_response(
+                timers
+                .filter_by(user_id=int(request.match_info['user_id']), is_private=False).all(),
+                dumps=dump_timer
+            )
         return web.json_response(
-            session()
-            .query(Timer)
-            .filter(Timer.user_id == int(request.match_info['user_id']), Timer.is_private is False).all(),
+            timers
+            .filter_by(user_id=int(request.match_info['user_id'])).all(),
             dumps=dump_timer
         )
-    return web.json_response(
-        session()
-        .query(Timer)
-        .filter(Timer.user_id == int(request.match_info['user_id']), Timer.is_private is False).all(),
-        dumps=dump_timer
-    )
 
 
 async def get_timer(request: web.Request):
-    print(request.match_info)
-    timer = session().query(Timer).filter(
-            Timer.user_id == int(request.match_info['user_id']), Timer.id == int(request.match_info['id']),
-        ).first()
+    with session() as s:
+        timer = s.query(Timer).filter(
+                Timer.user_id == int(request.match_info['user_id']), Timer.id == int(request.match_info['id']),
+            ).first()
     if (not request['user'] or request['user']['id'] != request.match_info['user_id']) and timer.is_private:
         return web.json_response({'message': 'Not found'}, status=404)
     return web.json_response(timer, dumps=dump_timer)
