@@ -31,5 +31,4 @@ def session() -> Session:
         SESSION = sessionmaker(bind=engine())
     s = SESSION()
     yield s
-    s.commit()
 

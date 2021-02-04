@@ -39,6 +39,7 @@ class Timer(Base):
     timer_text = Column(Text, nullable=True)
     timer_title = Column(String(255), nullable=False)
     from_date = Column(DateTime, nullable=False, default=datetime.utcnow)
+    to_date = Column(DateTime, nullable=True)
     is_private = Column(Boolean, default=False)
     is_stopped = Column(Boolean, default=False)
     user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)

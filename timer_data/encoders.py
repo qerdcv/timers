@@ -9,6 +9,7 @@ class TimerEncoder(json.JSONEncoder):
             return {
                 'id': obj.id,
                 'from_date': obj.from_date.isoformat(),
+                'to_date': obj.to_date.isoformat(),
                 'is_private': obj.is_private,
                 'is_stopped': obj.is_stopped,
                 'timer_title': obj.timer_title,

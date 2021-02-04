@@ -1,6 +1,5 @@
+from datetime import datetime
 from aiohttp import web
-
-from sqlalchemy import case
 
 from timer_data.api.utils import encode_user_password, encode_token, dump_timer
 from timer_data.db import User, Timer
@@ -58,6 +57,7 @@ async def create_timer(request):
     timer = Timer(**data)
     with session() as s:
         s.add(timer)
+        s.commit()
     return web.json_response({'id': timer.id})
 
 
@@ -82,6 +82,17 @@ async def get_timer(request: web.Request):
         timer = s.query(Timer).filter(
                 Timer.user_id == int(request.match_info['user_id']), Timer.id == int(request.match_info['id']),
             ).first()
-    if (not request['user'] or request['user']['id'] != request.match_info['user_id']) and timer.is_private:
+    if (not request['user'] or request['user']['id'] != int(request.match_info['user_id'])) and timer.is_private:
         return web.json_response({'message': 'Not found'}, status=404)
     return web.json_response(timer, dumps=dump_timer)
+
+
+@login_required
+async def stop_timer(request: web.Request):
+    with session() as s:
+        timer = s.query(Timer).filter_by(user_id=request['user']['id']).first()
+        timer.is_stopped = True
+        timer.to_date = datetime.utcnow()
+
+        s.commit()
+    return web.json_response({'message': 'ok'})
