@@ -36,7 +36,7 @@ async def login(request):
         )
     if encode_user_password(data['password']) != user.password:
         return web.json_response(
-            {'message': f'Wrong password'},
+            {'message': 'Wrong password'},
             status=403,
         )
     resp = web.HTTPFound('/')

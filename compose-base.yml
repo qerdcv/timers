@@ -6,6 +6,9 @@ services:
       context: src
       dockerfile: Dockerfile
     command: python main.py
+    environment:
+      PSQL_USER: admin
+      PSQL_PWD: "${PSQL_PWD}"
     depends_on:
       - db
     ports:

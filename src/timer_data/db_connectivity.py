@@ -1,4 +1,5 @@
 import os
+
 from contextlib import contextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
@@ -6,7 +7,7 @@ from sqlalchemy.orm import sessionmaker, Session
 ENGINE = None
 CONNECTION = None
 SESSION = None
-BASE_URL = f'postgresql://admin:admin@db/timer_data'
+BASE_URL = f'postgresql://{os.environ["PSQL_USER"]}:{os.environ["PSQL_PWD"]}@db/timer_data'
 
 
 def engine():
@@ -30,4 +31,3 @@ def session() -> Session:
         SESSION = sessionmaker(bind=engine())
     s = SESSION()
     yield s
-
