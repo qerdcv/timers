@@ -6,8 +6,7 @@ from sqlalchemy.orm import sessionmaker, Session
 ENGINE = None
 CONNECTION = None
 SESSION = None
-# BASE_URL = f'postgresql://admin:admin@0.0.0.0/timer_data'
-BASE_URL = 'sqlite:///:memory'
+BASE_URL = f'postgresql://admin:admin@db/timer_data'
 
 
 def engine():
