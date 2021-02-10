@@ -10,6 +10,7 @@ def create_routes():
         web.get('/api/logout', api.logout),
         # timer
         web.post('/api/timer', api.create_timer),
+        web.get('/api/timers', api.get_all_timers),
         web.patch('/api/timer/{id}/stop', api.stop_timer),
         # user
         web.get('/api/user/{user_id}/timers', api.get_timers),
