@@ -13,6 +13,7 @@ class User(Base):
     username = Column(String(20), unique=True, nullable=False)
     password = Column(String(), nullable=False)
     timers = relationship('Timer', backref='user')
+    date_published = Column(DateTime, nullable=False, default=datetime.utcnow)
 
     def __str__(self):
         return "<User(username='%s')>" % self.username
@@ -32,12 +33,18 @@ class User(Base):
             raise ValueError('Password is too short')
         return password
 
+    @validates('date_published')
+    def validate_date_published(self, key, date_published):
+        if date_published is not None:
+            raise ValueError('date_published is auto-generated field')
+
 
 class Timer(Base):
     __tablename__ = 'timers'
     id = Column(Integer, primary_key=True)
     timer_text = Column(Text, nullable=True)
     timer_title = Column(String(255), nullable=False)
+    date_published = Column(DateTime, nullable=False, default=datetime.utcnow)
     from_date = Column(DateTime, nullable=False, default=datetime.utcnow)
     to_date = Column(DateTime, nullable=True)
     is_private = Column(Boolean, default=False)
@@ -55,3 +62,8 @@ class Timer(Base):
         if len(timer_title) < 6:
             raise ValueError('Timer title is too short')
         return timer_title
+
+    @validates('date_published')
+    def validate_date_published(self, key, date_published):
+        if date_published is not None:
+            raise ValueError('date_published is auto-generated field')

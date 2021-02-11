@@ -1,4 +1,6 @@
 from datetime import datetime
+from math import ceil
+
 from aiohttp import web
 
 from timer_data.api.utils import encode_user_password, encode_token, dump_timer
@@ -96,3 +98,25 @@ async def stop_timer(request: web.Request):
 
         s.commit()
     return web.json_response({'message': 'ok'})
+
+
+async def get_all_timers(request):
+    limit = int(request.query.get('limit') or 5)
+    page = int(request.query.get('page') or 1)
+    with session() as s:
+        timer_count = s.query(Timer).filter_by(is_private=False).count()
+        timers = s.query(Timer).filter_by(is_private=False).order_by(Timer.date_published.desc()).slice(
+            (page - 1) * limit, ((page - 1) * limit) + limit
+        ).all()
+    return web.json_response(
+        {
+            'timers': timers,
+            'paginator': {
+                'prev_page': None if page <= 1 else page - 1,
+                'next_page': None if timer_count <= page * limit else page + 1,
+                'last_page': ceil(timer_count / limit)
+            }
+        },
+        status=200 if timers else 404,
+        dumps=dump_timer
+    )
